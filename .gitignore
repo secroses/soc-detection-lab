@@ -1,0 +1,25 @@
+# OpSec & Secrets
+*.env
+*.pem
+*.key
+*.pfx
+secrets/
+
+# OS and Editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Binaries & Memory Dumps
+*.exe
+*.dll
+*.dmp
+*.iso
+*.vmdk
+*.vdi
+
+# Raw logs
+*.log
+*.evtx
+archives.json
