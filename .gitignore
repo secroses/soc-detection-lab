@@ -23,3 +23,15 @@ Thumbs.db
 *.log
 *.evtx
 archives.json
+
+# Python & Virtual Environments
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Local Backups & Editor Swap files
+*.bak
+*.tmp
+*.swp
+*.env

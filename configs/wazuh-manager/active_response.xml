@@ -1,0 +1,13 @@
+<!-- Active Response Configuration for Windows Defender Firewall Block -->
+<command>
+  <name>win_firewall_block</name>
+  <executable>netsh.exe</executable>
+  <timeout_allowed>yes</timeout_allowed>
+</command>
+
+<active-response>
+  <command>win_firewall_block</command>
+  <location>local</location>
+  <rules_id>100010</rules_id>
+  <timeout>60</timeout>
+</active-response>
