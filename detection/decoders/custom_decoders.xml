@@ -1,0 +1,7 @@
+<!-- Custom Decoder: Extraccion limpia de IP de origen para Event ID 4625 (RDP) -->
+<decoder name="win_rdp_ip_extractor">
+  <parent>windows</parent>
+  <prematch>4625</prematch>
+  <regex offset="after_parent">ipAddress">(\d+.\d+.\d+.\d+)</regex>
+  <order>srcip</order>
+</decoder>
