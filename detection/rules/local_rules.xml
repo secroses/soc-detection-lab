@@ -1,4 +1,4 @@
-<group name="local,syslog,sshd,windows,powershell,rdp_attack,">
+<group name="local,syslog,sshd,windows,powershell,rdp_attack,ingress_tool_transfer,">
 
   <!-- Regla 100001: Autenticación SSH fallida puntual -->
   <rule id="100001" level="5">
@@ -50,6 +50,17 @@
       <id>T1059.001</id>
     </mitre>
     <group>execution,powershell,</group>
+  </rule>
+
+  <!-- Regla 100050: Descarga sospechosa vía LOLBin certutil.exe (MITRE T1105) -->
+  <rule id="100050" level="12">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.commandLine">(?i)certutil.*-urlcache</field>
+    <description>SOC Detection: descarga sospechosa de herramienta/payload vía certutil.exe (Ingress Tool Transfer - MITRE T1105)</description>
+    <mitre>
+      <id>T1105</id>
+    </mitre>
+    <group>execution,lolbin,ingress_tool_transfer,</group>
   </rule>
 
 </group>

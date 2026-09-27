@@ -14,12 +14,17 @@ Production-grade Security Operations Center (SOC) home lab deployed within stric
 ### 1. RDP Credential Guessing & Active Response (T1110 / T1110.001)
 - **Adversary Emulation:** RDP Credential Guessing executed via Hydra/xfreerdp from Kali Linux.
 - **Correlation Rule `100010` (Level 10):** Aggregates Event ID 4625 / SID 60122 failures within a 60s sliding window.
-- **Automated Active Response (SOAR):** Dynamic rule injection via `netsh.exe` dropping inbound traffic from the attacking host. Validated empirically with **83.14% packet loss** during the active containment window and automatic 60s rollback.
+- **Automated Active Response (SOAR):** Dynamic rule injection via `netsh.exe` dropping inbound traffic from the attacking host. Validated empirically with **83.14% packet loss**.
 
 ### 2. PowerShell Encoded Command Execution (T1059.001)
 - **Adversary Emulation:** Synthetic execution of Base64 encoded payload via `powershell.exe -EncodedCommand`.
 - **Detection Rule `100020` (Level 12):** Detects execution patterns using regex command-line parsing.
-- **Telemetry Enriched:** ScriptBlock Logging (`Event ID 4104`) integrated via `Microsoft-Windows-PowerShell/Operational` log channel.
+- **Telemetry Enriched:** ScriptBlock Logging (`Event ID 4104`) integrated via `Microsoft-Windows-PowerShell/Operational`.
+
+### 3. Ingress Tool Transfer via LOLBin (T1105)
+- **Adversary Emulation:** Malicious payload download via `certutil.exe -urlcache -split -f`.
+- **Detection Rule `100050` (Level 12):** Correlates Living Off the Land binary abuse.
+- **Forensic Validation:** Confirmed disk artifact presence at `C:\Windows\Temp\payload.txt`.
 
 ## Automated Smoke Test
 Validate repository integrity and XML rule syntax locally before committing:
