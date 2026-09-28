@@ -1,4 +1,4 @@
-<group name="local,syslog,sshd,windows,powershell,rdp_attack,ingress_tool_transfer,">
+<group name="local,syslog,sshd,windows,powershell,rdp_attack,ingress_tool_transfer,persistence,">
 
   <!-- Regla 100001: Autenticación SSH fallida puntual -->
   <rule id="100001" level="5">
@@ -50,6 +50,19 @@
       <id>T1059.001</id>
     </mitre>
     <group>execution,powershell,</group>
+  </rule>
+
+  <!-- Regla 100030: Persistencia vía Tareas Programadas (MITRE T1053.005) -->
+  <rule id="100030" level="10">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.image">\\schtasks\.exe</field>
+    <field name="win.eventdata.commandLine">/create</field>
+    <field name="win.eventdata.commandLine">SYSTEM</field>
+    <description>SOC Detection: Creación de Tarea Programada con privilegios SYSTEM (Persistencia - MITRE T1053.005)</description>
+    <mitre>
+      <id>T1053.005</id>
+    </mitre>
+    <group>windows,persistence,task_scheduler,</group>
   </rule>
 
   <!-- Regla 100050: Descarga sospechosa vía LOLBin certutil.exe (MITRE T1105) -->
