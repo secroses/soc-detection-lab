@@ -1,10 +1,10 @@
-<group name="local,syslog,sshd,windows,powershell,rdp_attack,ingress_tool_transfer,persistence,">
+<group name="local,syslog,sshd,windows,powershell,rdp_attack,ingress_tool_transfer,scheduled_task,defense_evasion,credential_dumping,">
 
-  <!-- Regla 100001: Autenticación SSH fallida puntual -->
+  <!-- Regla 100001: Autenticacion SSH fallida puntual -->
   <rule id="100001" level="5">
     <if_sid>5716</if_sid>
     <srcip>1.1.1.1</srcip>
-    <description>sshd: intento de autenticación fallido desde la IP $(srcip).</description>
+    <description>sshd: intento de autenticacion fallido desde la IP $(srcip).</description>
     <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,</group>
   </rule>
 
@@ -12,7 +12,7 @@
   <rule id="100010" level="10" frequency="4" timeframe="60">
     <if_matched_sid>60122</if_matched_sid>
     <same_field>data.win.eventdata.ipAddress</same_field>
-    <description>SOC Detection: múltiples fallos de logon RDP detectados desde la misma IP (posible fuerza bruta - MITRE T1110)</description>
+    <description>SOC Detection: multiples fallos de logon RDP detectados desde la misma IP (posible fuerza bruta - MITRE T1110)</description>
     <mitre>
       <id>T1110</id>
       <id>T1110.001</id>
@@ -24,56 +24,71 @@
   <rule id="100011" level="12" frequency="3" timeframe="1800">
     <if_matched_sid>100010</if_matched_sid>
     <same_field>data.win.eventdata.ipAddress</same_field>
-    <description>SOC Detection: IP con fuerza bruta RDP recurrente pese a contención previa (atacante persistente - MITRE T1110)</description>
+    <description>SOC Detection: IP con fuerza bruta RDP recurrente pese a contencion previa (atacante persistente - MITRE T1110)</description>
     <mitre>
       <id>T1110</id>
     </mitre>
     <group>authentication_failures,attack,pci_dss_10.2.4,pci_dss_10.2.5,</group>
   </rule>
 
-  <!-- Regla 100020: Ejecución de PowerShell Codificado (MITRE T1059.001) -->
+  <!-- REGLA 100020: Ejecucion de PowerShell Codificado (REFACTORIZADA PCRE2) -->
   <rule id="100020" level="12">
     <if_group>windows</if_group>
-    <field name="win.eventdata.commandLine">(?i)-e|-enc|-encodedcommand</field>
-    <description>SOC Detection: ejecución de PowerShell ofuscado/codificado en Base64 (MITRE T1059.001)</description>
-    <mitre>
-      <id>T1059.001</id>
-    </mitre>
+    <field name="win.eventdata.image" type="pcre2">(?i)powershell\.exe|pwsh\.exe</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(\s-e\s|\s-ec\s|\s-enc\s|\s-encodedcommand\s)</field>
+    <description>SOC Detection: Ejecucion de PowerShell ofuscado/codificado en Base64 (MITRE T1059.001)</description>
+    <mitre><id>T1059.001</id></mitre>
     <group>execution,powershell,</group>
   </rule>
 
   <!-- Regla 100021: ScriptBlock Logging Event ID 4104 (MITRE T1059.001) -->
   <rule id="100021" level="10">
     <if_sid>91802</if_sid>
-    <description>SOC Detection: auditoría de ScriptBlock Logging de PowerShell (MITRE T1059.001)</description>
+    <description>SOC Detection: auditoria de ScriptBlock Logging de PowerShell (MITRE T1059.001)</description>
     <mitre>
       <id>T1059.001</id>
     </mitre>
     <group>execution,powershell,</group>
   </rule>
 
-  <!-- Regla 100030: Persistencia vía Tareas Programadas (MITRE T1053.005) -->
-  <rule id="100030" level="10">
+  <!-- REGLA 100030: Creacion de Tarea Programada con privilegios SYSTEM -->
+  <rule id="100030" level="12">
     <if_group>windows</if_group>
     <field name="win.eventdata.image">\\schtasks\.exe</field>
     <field name="win.eventdata.commandLine">/create</field>
     <field name="win.eventdata.commandLine">SYSTEM</field>
-    <description>SOC Detection: Creación de Tarea Programada con privilegios SYSTEM (Persistencia - MITRE T1053.005)</description>
-    <mitre>
-      <id>T1053.005</id>
-    </mitre>
-    <group>windows,persistence,task_scheduler,</group>
+    <description>SOC Detection: Creacion de Tarea Programada con privilegios SYSTEM (Persistencia - MITRE T1053.005)</description>
+    <mitre><id>T1053.005</id></mitre>
+    <group>execution,persistence,task_scheduler,</group>
   </rule>
 
-  <!-- Regla 100050: Descarga sospechosa vía LOLBin certutil.exe (MITRE T1105) -->
+  <!-- REGLA 100040: Destruccion de Logs de Seguridad -->
+  <rule id="100040" level="13">
+    <if_group>windows</if_group>
+    <field name="win.system.eventID">^1102$</field>
+    <description>SOC Detection: Vaciado intencional del log de Seguridad de Windows (Evasion - MITRE T1070.001)</description>
+    <mitre><id>T1070.001</id></mitre>
+    <group>windows,defense_evasion,</group>
+  </rule>
+
+  <!-- REGLA 100050: Descarga sospechosa via LOLBin certutil.exe (REFACTORIZADA) -->
   <rule id="100050" level="12">
     <if_group>windows</if_group>
-    <field name="win.eventdata.commandLine">(?i)certutil.*-urlcache</field>
-    <description>SOC Detection: descarga sospechosa de herramienta/payload vía certutil.exe (Ingress Tool Transfer - MITRE T1105)</description>
-    <mitre>
-      <id>T1105</id>
-    </mitre>
+    <field name="win.eventdata.originalFileName">certutil\.exe</field>
+    <field name="win.eventdata.commandLine">-urlcache</field>
+    <description>SOC Detection: Descarga sospechosa de herramienta/payload via certutil.exe (Ingress Tool Transfer - MITRE T1105)</description>
+    <mitre><id>T1105</id></mitre>
     <group>execution,lolbin,ingress_tool_transfer,</group>
+  </rule>
+
+  <!-- REGLA 100060: Volcado de Memoria LSASS via comsvcs.dll -->
+  <rule id="100060" level="12">
+    <if_group>windows</if_group>
+    <field name="win.eventdata.image" type="pcre2">(?i)rundll32\.exe</field>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)comsvcs.*MiniDump</field>
+    <description>SOC Detection: Volcado de memoria de LSASS mediante comsvcs.dll (Credential Dumping - MITRE T1003.001)</description>
+    <mitre><id>T1003.001</id></mitre>
+    <group>windows,credential_dumping,</group>
   </rule>
 
 </group>
