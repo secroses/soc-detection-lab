@@ -120,4 +120,4 @@ Qué verifica:
 Este proyecto incluye comandos de emulación de adversarios y ajustes de respuesta defensiva. Ejecútalo únicamente en entornos aislados que te pertenezcan o para los que tengas autorización explícita de pruebas.
 
 ## Licencia
-Actualmente no existe un archivo de licencia en este repositorio.
+MIT License
